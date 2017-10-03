@@ -2,41 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/soria/soria.css" media="screen">-->
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/nihilo/nihilo.css" media="screen">-->
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/tundra/tundra.css" media="screen">-->
+
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:true"></script>
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+
+    <!--<link rel="stylesheet" href="/jslib/htable.css" media="screen">-->
+    <!--<link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">-->
+    <!--<link rel="stylesheet" type="text/css" href="/jslib/contentController.css" media="screen">-->
+    <!--<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>-->
+    <!--<title>MODA.UA</title>-->
 </head>
-<body>
+<body class="claro">
 
-<!--<table style="width:373px;border:#B0C4DE solid 1px; ">-->
-    <!--<tr>-->
-        <!--<td style="background-color:#B0C4DE; text-align: center">Get JSON data</td>-->
-    <!--</tr>-->
-    <!--<tr>-->
-        <!--<td>-->
-            <!--<form action="UploadServlet" method="post" enctype="multipart/form-data">-->
-                <!--<input type=file name=ufile accept=".xls, .xlsx">-->
-                <!--<input type=submit style="width:115px" value="Attach and view" id="view_file">-->
-            <!--</form>-->
-        <!--</td>-->
-    <!--</tr>-->
-<!--</table>-->
-
-
-<table style="width:373px;border:#B0C4DE solid 1px; margin-top: 20px">
-    <tr>
-        <td style="background-color:#B0C4DE; text-align: center">Load and save file</td>
-    </tr>
-    <tr>
-        <td>
-            <form action="LoadXLSServlet" method="post" enctype="multipart/form-data">
-                <input type=file name=ufile accept=".xls, .xlsx">
-                <input type=submit style="width:115px" value="Load file" id="save_file">
-            </form>
-            </form>
-        </td>
-    </tr>
-</table>
+<form id="form">
+    <!--<input type="text"/>-->
+    <!--<button type="submit" form="form">Generate Report</button>-->
+</form>
 
 </body>
 <script type="text/javascript">
 
+    require(["dijit/form/Button", "dojo/request/iframe", "dojo/dom", "dojo/dom-construct", "dojo/json", "dojo/on", "dojo/request/handlers", "dojo/domReady!"],
+            function (Button, iframe, dom, domConst, JSON, on, handlers) {
+
+                var but = new Button({"label": "download file", id: "btn_download_file"});
+                but.startup();
+                document.body.appendChild(but.domNode);
+
+                handlers.register("xlsx", function (response) {
+
+                    console.log("response=", response);
+                    return response.text.split(",");
+                });
+
+                but.onClick = function () {
+
+                    //                var Iframe=iframe.create('iframeName',"onloadStr","'/get_file'");
+
+//                    var dfd = iframe('/get_file', {
+//                        method:"GET",
+//                        form: document.getElementById('formXLSX'),
+//                        handleAs: "html"
+//                    }).then(function (response) {
+//                       // stopProgress();
+//                        console.log("<p>response: <code>" + JSON.stringify(response.data) + "</code></p>", "output");
+//                    });
+//                    dfd.cancel();
+
+
+//                    iframe._currentDfd = null;
+//                    iframe.get('/get_file', {
+//                        // data: params,
+//                      //  handleAs: "xlsx"
+//                    }).then(function (data) {
+//                        console.log('Then called' + data);
+//                    }, function (err) {
+//                        console.log(err);
+//                    });
+
+
+
+//                    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+//                    xmlhttp.open("POST", "/get_file",true);
+//
+//                  //  xmlhttp.setRequestHeader("Connection", "keep-alive");
+//                    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+//                    xmlhttp.setRequestHeader('Accept', 'localhost:8183');
+//                    xmlhttp.setRequestHeader('Cache-Control', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8');
+//                  //  xmlhttp.setRequestHeader('Accept-Encoding', 'gzip, deflate, br');
+//                    xmlhttp.setRequestHeader('Accept-Language', 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,uk;q=0.2');
+
+                   // document.querySelector('#form').addEventListener('submit', function(e){
+                       // e.preventDefault();
+
+                        var xhr = new XMLHttpRequest();
+                        //set the request type to post and the destination url to '/convert'
+                        xhr.open('POST', "/get_file");
+                        //set the reponse type to blob since that's what we're expecting back
+                        xhr.responseType = 'blob';
+//                        var formData = new FormData(this);    console.log("formData=",formData);
+//                        xhr.send(formData);
+
+                 //   var formData = new FormData(this);    console.log("formData=",formData);
+                    xhr.send(JSON.stringify({ email: "hello@user.com", response: { name: "Tester" }}));
+
+                        xhr.onload = function(e) {
+                            if (this.status == 200) {
+                                // Create a new Blob object using the response data of the onload object
+                                var blob = new Blob([this.response], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+                                //Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
+                                var a = document.createElement("a");
+                                a.style = "display: none";
+                                document.body.appendChild(a);
+                                //Create a DOMString representing the blob and point the link element towards it
+                                var url = window.URL.createObjectURL(blob);
+                                a.href = url;
+                                a.download = 'myXLSX.xlsx';
+                                //programatically click the link to trigger the download
+                                a.click();
+                                //release the reference to the file by revoking the Object URL
+                                window.URL.revokeObjectURL(url);
+                            }else{
+                                //deal with your error state here
+                            }
+                        };
+
+                    xhr.onreadystatechange = function() {
+                        console.log("onreadystatechange xhr.readyStat=", xhr.readyStat);
+                        if (xhr.readyState == 4) {
+                            console.log("xhr.readyState == 4", xhr.readyStat);
+                            if (xhr.status == 200) {
+                                console.log("xhr.status == 200", xhr.status);
+                            }
+                        }
+                    };
+
+
+
+                   // });
+
+
+
+//                    xmlhttp.onreadystatechange = function() {
+//                        console.log("onreadystatechange xmlhttp.readyStat=", xmlhttp.readyStat);
+//                        if (xmlhttp.readyState == 4) {
+//                            console.log("xmlhttp.readyState == 4", xmlhttp.readyStat);
+//                            if (xmlhttp.status == 200) {
+//                                console.log("xmlhttp.status == 200", xmlhttp.status);
+//                            }
+//                        }
+//                    };
+
+
+//                    { host: 'localhost:8181',
+//                            connection: 'keep-alive',
+//                           // 'content-length': '19810',
+//                            'cache-control': 'max-age=0',
+//                            origin: 'http://localhost:8181',
+//                            'upgrade-insecure-requests': '1',
+//                            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
+//                            'content-type': 'application/x-www-form-urlencoded',
+//                            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+//                            referer: 'http://localhost:8181/',
+//                            'accept-encoding': 'gzip, deflate, br',
+//                            'accept-language': 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,uk;q=0.2',
+//                            cookie: 'mduUser=admin; mduPswrd=admin; fileDownload=true' },
+
+
+               //     xmlhttp.send(JSON.stringify({ email: "hello@user.com", response: { name: "Tester" }}));
+
+
+                };
+            });
 </script>
 </html>
